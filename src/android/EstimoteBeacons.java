@@ -43,7 +43,8 @@ public class EstimoteBeacons extends CordovaPlugin {
         super.initialize(cordova, webView);
 
         iBeaconManager = new BeaconManager(this.cordova.getActivity().getApplicationContext());
-        currentRegion = new Region("B9407F30-F5F8-466E-AFF9-25556B57FE6D", null, null);
+
+        currentRegion = new Region("rid", null, null, null);
         iBeaconManager.setRangingListener(new BeaconManager.RangingListener() {
             @Override
             public void onBeaconsDiscovered(Region region, List<Beacon> beacons) {
@@ -59,8 +60,6 @@ public class EstimoteBeacons extends CordovaPlugin {
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-        Log.d(EstimoteBeacons.class.toString(), "action - >" + action);
-
         try {
             if (action.equalsIgnoreCase(START_ESTIMOTE_BEACONS_DISCOVERY_FOR_REGION)) {
                 startEstimoteBeaconsDiscoveryForRegion();
@@ -87,6 +86,7 @@ public class EstimoteBeacons extends CordovaPlugin {
             }
 
             if (action.equalsIgnoreCase(GET_BEACONS)) {
+                Log.d(EstimoteBeacons.class.toString(), "beacons - >" + beacons);
                 callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, listToJSONArray(beacons)));
                 return true;
             }
@@ -94,6 +94,7 @@ public class EstimoteBeacons extends CordovaPlugin {
         } catch (Exception e) {
             System.out.println(e.getMessage());
             callbackContext.error(e.getMessage());
+            Log.d(EstimoteBeacons.class.toString(), e.getMessage());
             return false;
         }
         return false;
@@ -108,7 +109,18 @@ public class EstimoteBeacons extends CordovaPlugin {
     }
 
     private void startRangingBeaconsInRegion() throws RemoteException{
-        iBeaconManager.startRanging(currentRegion);
+        iBeaconManager.connect(new BeaconManager.ServiceReadyCallback(){
+            @Override
+            public void onServiceReady() {
+                try {
+                    iBeaconManager.startRanging(currentRegion);
+                } catch (RemoteException re) {
+                    Log.d(EstimoteBeacons.class.toString(), re.getMessage());
+                }
+
+            }
+        });
+
     }
 
     private void stopRangingBeaconsInRegion() throws RemoteException{
@@ -139,12 +151,12 @@ public class EstimoteBeacons extends CordovaPlugin {
      */
     private JSONObject beaconToJSONObject(Beacon beacon) throws JSONException{
         JSONObject object = new JSONObject();
-        object.put("proximityUUID", beacon.proximityUUID);
-        object.put("major", beacon.major);
-        object.put("minor", beacon.minor);
-        object.put("rssi", beacon.rssi);
-        object.put("macAddress", beacon.macAddress);
-        object.put("measuredPower", beacon.measuredPower);
+        object.put("proximityUUID", beacon.getProximityUUID());
+        object.put("major", beacon.getMajor());
+        object.put("minor", beacon.getMinor());
+        object.put("rssi", beacon.getRssi());
+        object.put("macAddress", beacon.getMacAddress());
+        object.put("measuredPower", beacon.getMeasuredPower());
         return object;
     }
 }

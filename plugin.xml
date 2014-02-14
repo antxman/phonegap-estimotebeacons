@@ -17,6 +17,14 @@
                 <param name="android-package" value="com.antxman.estimotebeacons.EstimoteBeacons" />
             </feature>
         </config-file>
+        <config-file target="AndroidManifest.xml" parent="/*">
+            <service android:exported="false" android:name="com.estimote.sdk.service.BeaconService" />
+            <uses-permission android:name="android.permission.BLUETOOTH" />
+            <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+        </config-file>
+        <config-file target="AndroidManifest.xml" parent="/manifest/application">
+            <service android:exported="false" android:name="com.estimote.sdk.service.BeaconService"/>
+        </config-file>
         <source-file src="libs/estimote-sdk-preview.jar" target-dir="libs" />
         <source-file src="libs/guava-15.0.jar" target-dir="libs" />
     </platform>
