@@ -157,6 +157,7 @@ public class EstimoteBeacons extends CordovaPlugin {
         object.put("rssi", beacon.getRssi());
         object.put("macAddress", beacon.getMacAddress());
         object.put("measuredPower", beacon.getMeasuredPower());
+        object.put("distance", Utils.computeAccuracy(beacon));
         return object;
     }
 }
